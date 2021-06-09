@@ -11,13 +11,10 @@ import { safeGet, Empty } from "@/utils/tool";
 {{#if connect_model}}
 import { connect } from 'umi';
 import type { Dispatch } from "umi";
-
-export type {{module_name}ItemDetailProps = {
+export type {{module_name}}ItemDetailProps = {
   dispatch: Dispatch;
 };
-
 {{/if}}
-
 
 const empty = <MinorText>暂无</MinorText>;
 
@@ -42,7 +39,7 @@ interface {{module_name}}ItemShape {
 }
 
 {{#if connect_model}}
-const {{module_name}}ItemDetail: FC<{{module_name}ItemDetailProps> = ({
+const {{module_name}}ItemDetail: FC<{{module_name}}ItemDetailProps> = ({
   dispatch,
 }) => {
 {{else}}

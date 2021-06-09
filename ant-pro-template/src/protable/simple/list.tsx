@@ -13,7 +13,6 @@ import {
 } from "./api";
 import { PlusOutlined } from "@ant-design/icons";
 import { useRequest } from "ahooks";
-
 {{#if batch_handler}}
 import type { TableRowSelection } from "antd/lib/table/interface";
 {{/if}}
@@ -25,8 +24,6 @@ export type {{module_name}}Props = {
   dispatch: Dispatch;
 };
 {{/if}}
-
-
 
 interface {{module_name}}TableListItem {
   id: string;
