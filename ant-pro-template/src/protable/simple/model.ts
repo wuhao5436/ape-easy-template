@@ -1,6 +1,6 @@
 
 import type { Reducer, Effect } from "umi";
-import { getCommodityDetail } from "./api";
+import { getTableList } from "./api";
 
 export type {{module_name}}State = {
   commodityInfo: {};
@@ -16,7 +16,7 @@ export type {{module_name}}ModelType = {
     fetchCommodity: Effect;
   };
   reducers: {
-    save: Reducer<commodityDetailState>;
+    save: Reducer<{{module_name}}State>;
   };
 };
 
@@ -29,7 +29,7 @@ const {{module_name}}Model: {{module_name}}ModelType = {
 
   effects: {
     *fetchCommodity({ payload }, { call, put }) {
-      const commodityInfo = yield call(getCommodityDetail, payload);
+      const commodityInfo = yield call(getTableList, payload);
       yield put({
         type: "save",
         payload: {
