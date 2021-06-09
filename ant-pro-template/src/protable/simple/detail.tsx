@@ -84,7 +84,7 @@ export default function {{module_name}}ItemDetail() {
           <Form.Item label="商品轮播图">
             {commdityMainPicture ? (
               commdityMainPicture?.map((url: string) => (
-                <div style={{ margin: 8 }}>
+                <div style=\{{ margin: 8 }}>
                   <Image width={180} key={url} src={url} />
                 </div>
               ))
@@ -114,7 +114,7 @@ export default function {{module_name}}ItemDetail() {
             console.log(values);
             message.success('提交成功');
           }}
-          initialValues={{
+          initialValues=\{{
             name: '蚂蚁设计有限公司',
             name2: '蚂蚁设计集团',
             useMode: 'chapter',
