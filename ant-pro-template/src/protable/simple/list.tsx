@@ -14,6 +14,20 @@ import {
 import { PlusOutlined } from "@ant-design/icons";
 import { useRequest } from "ahooks";
 
+{{#if batch_handler}}
+import type { TableRowSelection } from "antd/lib/table/interface";
+{{/if}}
+{{#if connect_model}}
+import { connect } from 'umi';
+import type { Dispatch } from "umi";
+
+export type {{module_name}}Props = {
+  dispatch: Dispatch;
+};
+{{/if}}
+
+
+
 interface {{module_name}}TableListItem {
   id: string;
   picName: string;
@@ -23,22 +37,31 @@ interface {{module_name}}TableListItem {
   gmtModified: string;
 }
 
-// console.log('I am compile the {{module_name}} module')
-
-
 const layout = {
   labelCol: { span: 7 },
   wrapperCol: { span: 14 },
 };
 
+{{#if connect_model}}
+const TableList: FC<{{module_name}}Props> = ({
+  dispatch,
+}) => {
+{{else}}
 const TableList: React.FC = () => {
+{{/if}}
   const actionRef = useRef<ActionType>();
+  const [form] = Form.useForm();
+  {{#if batch_handler}}
+  /** 批量操作 */
+  const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
+  const [selectedRows, setSelectedRows] = useState<CommodityItem[]>([]);
+  {{/if}}
+
+  {{#if hander_modal}}
   const [ modalVisible, setModalVisible ] = useState<boolean>(false);
   const [ curHandleItem, setCurHandleItem ] = useState<{{module_name}}TableListItem | null>(
     null
   );
-  const [form] = Form.useForm();
-
   const { run: runGetImageDetail, loading: getDetailloading } = useRequest(
     getImageDetails,
     {
@@ -61,29 +84,21 @@ const TableList: React.FC = () => {
     }
   );
 
-  /** 删除图片 */
-  const deleteSingle = async (id: string) => {
-    const res = await deleteImage({ id });
-    if (res) {
-      actionRef.current?.reload();
-    }
-  };
-
-  /** 点击添加图片 */
+  /** 点击添加 */
   const showAddModal = async () => {
     setModalVisible(true);
     form.resetFields();
     setCurHandleItem(null);
   };
 
-  /** 点击编辑图片 */
+  /** 点击编辑 */
   const editItem = async (item: {{module_name}}TableListItem) => {
     setModalVisible(true);
     setCurHandleItem(item);
     await runGetImageDetail({ pictureId: item.id });
   };
 
-  /** 新增编辑图片 */
+  /** 新增编辑 */
   const handleFinishImageEdit = async (values: any) => {
     values.picUrl = values.picUrl?.[0]?.url;
     const handler = curHandleItem ? updateImage : addNewImage;
@@ -93,6 +108,26 @@ const TableList: React.FC = () => {
     const res = await handler(values);
     if (res) {
       setModalVisible(false);
+      actionRef.current?.reload();
+    }
+  };
+  {{/if}}
+
+  {{#if batch_handler}}
+  const rowSelection: TableRowSelection<{{module_name}}TableListItem> = {
+    selectedRowKeys,
+    onChange: (newSelectedRowKeys, newSelectedRows) => {
+      setSelectedRowKeys(newSelectedRowKeys as number[]);
+      setSelectedRows(newSelectedRows);
+    },
+  };
+  {{/if}}
+
+
+  /** 删除 */
+  const deleteSingle = async (id: string) => {
+    const res = await deleteImage({ id });
+    if (res) {
       actionRef.current?.reload();
     }
   };
@@ -138,6 +173,9 @@ const TableList: React.FC = () => {
   return (
     <PageContainer>
       <ProTable<{{module_name}}TableListItem>
+        form={{
+          ignoreRules: false,
+        }}
         actionRef={actionRef}
         withIndex={true}
         rowKey="id"
@@ -157,13 +195,17 @@ const TableList: React.FC = () => {
             添加
           </Button>,
         ]}
+        {{#if batch_handler}}
+        rowSelection={rowSelection}
+        {{/if}}
       />
+      {{#if hander_modal}}
       <ModalForm
         {...layout}
         width={800}
         visible={modalVisible}
-        form={form}
-        title={`${curHandleItem ? "编辑" : "新增"}图片`}
+        formRef={form}
+        title={`${curHandleItem ? "编辑" : "新增"}`}
         size="large"
         layout="horizontal"
         onFinish={handleFinishImageEdit}
@@ -178,12 +220,12 @@ const TableList: React.FC = () => {
         <Spin spinning={getDetailloading}>
           <ProFormText
             name="picName"
-            label="图片名称"
+            label="名称"
             required
             rules={[
               {
                 required: true,
-                message: "请输入图片名称",
+                message: "请输入名称",
               },
             ]}
           />
@@ -217,8 +259,13 @@ const TableList: React.FC = () => {
           />
         </Spin>
       </ModalForm>
+      {{/if}}
     </PageContainer>
   );
 };
 
+{{#if connect_model}}
+export default connect(({  namespace }) => ({ namespace}))(TableList)
+{{else}}
 export default TableList;
+{{/if}}

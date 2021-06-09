@@ -8,6 +8,16 @@ import { getItemDetail } from "./api";
 import { useRequest } from "ahooks";
 import { MinorText } from "@qiaoqiao/qiaoqiao-lib";
 import { safeGet, Empty } from "@/utils/tool";
+{{#if connect_model}}
+import { connect } from 'umi';
+import type { Dispatch } from "umi";
+
+export type {{module_name}ItemDetailProps = {
+  dispatch: Dispatch;
+};
+
+{{/if}}
+
 
 const empty = <MinorText>暂无</MinorText>;
 
@@ -31,8 +41,13 @@ interface {{module_name}}ItemShape {
   brandQualifications: string[];
 }
 
-
-export default function {{module_name}}ItemDetail() {
+{{#if connect_model}}
+const {{module_name}}ItemDetail: FC<{{module_name}ItemDetailProps> = ({
+  dispatch,
+}) => {
+{{else}}
+const {{module_name}}ItemDetail: React.FC = () => {
+{{/if}}
   const { id } = useParams();
   const { loading, data: detailData } = useRequest(() =>
     getItemDetail({ id })
@@ -204,3 +219,12 @@ export default function {{module_name}}ItemDetail() {
     careful: res.note,
   };
 };
+
+
+
+
+{{#if connect_model}}
+export default connect(({  namespace }) => ({ namespace}))({{module_name}}ItemDetail)
+{{else}}
+export default {{module_name}}ItemDetail
+{{/if}}
