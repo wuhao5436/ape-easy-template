@@ -173,7 +173,7 @@ const TableList: React.FC = () => {
   return (
     <PageContainer>
       <ProTable<{{module_name}}TableListItem>
-        form={{
+        form=\{{
           ignoreRules: false,
         }}
         actionRef={actionRef}
