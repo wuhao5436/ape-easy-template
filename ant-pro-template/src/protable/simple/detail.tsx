@@ -15,7 +15,8 @@ const layout = {
   labelCol: { span: 4 },
   wrapperCol: { span: 16 },
 }
-interface ItemShape {
+
+interface {{module_name}}ItemShape {
   cagetory: number[];
   commodityName: string;
   subtitle: string;
@@ -31,7 +32,7 @@ interface ItemShape {
 }
 
 
-export default function ItemDetail() {
+export default function {{module_name}}ItemDetail() {
   const { id } = useParams();
   const { loading, data: detailData } = useRequest(() =>
     getItemDetail({ id })
@@ -187,7 +188,7 @@ export default function ItemDetail() {
 
 
 /** 数据格式化工具 */
-ItemDetail.getInfoFromResponse = (res: any ) => {
+{{module_name}}ItemDetail.getInfoFromResponse = (res: any ) => {
   return {
     cagetory: [res.firstCatId, res.secondCatId, res.thirdCatId].filter(
       (item) => !!item
