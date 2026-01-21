@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Card, Space, Popconfirm, Button, Form, Spin } from "antd";
+import { Space, Popconfirm, Button, Form, Spin, message } from "antd";
 import type { ActionType, ProColumns } from "@ant-design/pro-table";
 import { ModalForm, ProFormTextArea, ProFormText } from "@ant-design/pro-form";
 import { ProTable, VALUE_TYPE, Upload, UPLOAD_TYPE } from "qiaoqiao-lib";
@@ -34,24 +34,30 @@ interface {{module_name}}TableListItem {
   gmtModified: string;
 }
 
+interface FormValues {
+  picName: string;
+  picUrl?: { url: string }[];
+  remark?: string;
+}
+
 const layout = {
   labelCol: { span: 7 },
   wrapperCol: { span: 14 },
 };
 
 {{#if connect_model}}
-const TableList: FC<{{module_name}}Props> = ({
-  dispatch,
+const TableList: React.FC<{{module_name}}Props> = ({
+  dispatch: _dispatch,
 }) => {
 {{else}}
 const TableList: React.FC = () => {
 {{/if}}
   const actionRef = useRef<ActionType>();
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<FormValues>();
   {{#if batch_handler}}
   /** 批量操作 */
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
-  const [selectedRows, setSelectedRows] = useState<CommodityItem[]>([]);
+  const [selectedRows, setSelectedRows] = useState<{{module_name}}TableListItem[]>([]);
   {{/if}}
 
   {{#if hander_modal}}
@@ -96,14 +102,16 @@ const TableList: React.FC = () => {
   };
 
   /** 新增编辑 */
-  const handleFinishImageEdit = async (values: any) => {
-    values.picUrl = values.picUrl?.[0]?.url;
-    const handler = curHandleItem ? updateImage : addNewImage;
-    if (curHandleItem) {
-      values.id = curHandleItem.id;
-    }
-    const res = await handler(values);
+  const handleFinishImageEdit = async (values: FormValues) => {
+    const submitValues = {
+      ...values,
+      picUrl: values.picUrl?.[0]?.url,
+    } as Omit<{{module_name}}TableListItem, "id">;
+    const res = curHandleItem
+      ? await updateImage({ ...submitValues, id: curHandleItem.id })
+      : await addNewImage(submitValues);
     if (res) {
+      message.success(curHandleItem ? "更新成功" : "创建成功");
       setModalVisible(false);
       actionRef.current?.reload();
     }
@@ -136,6 +144,10 @@ const TableList: React.FC = () => {
       copyable: true,
     },
     {
+      title: "名称",
+      dataIndex: "picName",
+    },
+    {
       title: "备注",
       dataIndex: "remark",
       hideInSearch: true,
@@ -153,7 +165,9 @@ const TableList: React.FC = () => {
       render: (text, record) => {
         return (
           <Space>
+            {{#if hander_modal}}
             <a onClick={() => editItem(record)}>编辑</a>
+            {{/if}}
             <Popconfirm
               title="确定删除？"
               onConfirm={() => {
@@ -182,6 +196,7 @@ const TableList: React.FC = () => {
         }}
         request={getImageList}
         columns={columns}
+        {{#if hander_modal}}
         toolBarRender={() => [
           <Button
             key="button"
@@ -192,6 +207,7 @@ const TableList: React.FC = () => {
             添加
           </Button>,
         ]}
+        {{/if}}
         {{#if batch_handler}}
         rowSelection={rowSelection}
         {{/if}}
@@ -201,7 +217,7 @@ const TableList: React.FC = () => {
         {...layout}
         width={800}
         visible={modalVisible}
-        formRef={form}
+        form={form}
         title={`${curHandleItem ? "编辑" : "新增"}`}
         size="large"
         layout="horizontal"
